@@ -1,0 +1,7 @@
+GET https://geocoding-api.open-meteo.com/v1/search?name=sabadell&count=1&language=es&format=json HTTP/1.1
+
+### 
+GET https://api.open-meteo.com/v1/forecast?latitude=41.54329&longitude=-2.10942&current=temperature_2m HTTP/1.1
+
+
+###

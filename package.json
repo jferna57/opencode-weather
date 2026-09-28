@@ -3,10 +3,19 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "build": "bun build --compile index.ts --outfile weather",
+    "start": "bun run index.ts",
+    "dev": "bun run index.ts --watch"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/prompts": "^2.4.9"
   },
   "peerDependencies": {
     "typescript": "^7"
+  },
+  "dependencies": {
+    "prompts": "^2.4.2"
   }
 }
