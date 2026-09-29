@@ -4,26 +4,30 @@
 
 - **Runtime**: Bun (not Node.js) — use `bun` commands exclusively
 - **Package manager**: `bun install` / `bun add`
-- **Run**: `bun index.ts` (entry point)
-- **Build binary**: `bun build index.ts --compile --outfile weather`
+- **Run**: `bun src/index.ts` (entry point)
+- **Build binary**: `bun build src/index.ts --compile --outfile weather`
 - **Test**: `bun test` (uses `bun:test`)
 - **Typecheck**: `bunx tsc --noEmit`
 
 ## Project Structure
 
-- `index.ts` — entry point: menu loop + option handlers
-- `db.ts` — SQLite via `bun:sqlite`, persists to `weather.db` (gitignored; created on first import)
-- `api.ts` — `geocode()` + `fetchWeather()` (native `fetch`)
-- `ui.ts` — menu rendering and `prompts` interactions (all prompts go through a cancel-safe wrapper)
-- `types.ts` — shared types
+- `src/index.ts` — entry point: menu loop + option handlers
+- `src/db.ts` — SQLite via `bun:sqlite`, persists to `~/.config/weather-cli/weather.db` (override dir with `WEATHER_CONFIG_DIR` env var, used by tests)
+- `src/api.ts` — `geocode()` (returns up to 5 results), `fetchWeather()`, `fetchForecast()` (7-day, native `fetch`)
+- `src/ui.ts` — menu rendering, `prompts` interactions (cancel-safe wrapper), kleur colors, spinner, forecast display
+- `src/types.ts` — shared types
+- `src/db.test.ts` — storage tests (isolated temp DB via `WEATHER_CONFIG_DIR`)
+- `src/api.test.ts` — API tests with mocked `fetch`
 - `tsconfig.json` — Strict TypeScript, bundler module resolution, ESNext target
-- No test files yet
 
 ## State
 
-- Menu options 1–5, 8, 9 implemented; unit (°C/°F) persisted in `settings` table
+- Menu options 1–9 implemented; unit (°C/°F) persisted in `settings` table
+- Options 6/7: 7-day forecast (default city / pick a city)
 - First city added becomes default automatically; duplicate cities are rejected by name+coords
-- Dependency: `prompts` (UI). Keep `bunx tsc --noEmit` clean before finishing
+- Colors via `kleur`: cyan (menu), yellow (temps), green (info), red (errors)
+- Async operations show a spinner; geocoding returns multiple results with a select prompt for ambiguous names
+- Dependencies: `prompts` (UI), `kleur` (colors). Keep `bunx tsc --noEmit` and `bun test` clean before finishing
 
 ## Conventions (from bun-instructions.md)
 
@@ -35,8 +39,9 @@
 
 ## API Integration (OpenMeteo)
 
-1. Geocoding: `https://geocoding-api.open-meteo.com/v1/search?name={city}&count=1&language=es&format=json`
-2. Forecast: `https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m`
+1. Geocoding: `https://geocoding-api.open-meteo.com/v1/search?name={city}&count=5&language=es&format=json`
+2. Current weather: `https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m`
+3. 7-day forecast: `https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min,weathercode&forecast_days=7`
 
 ## CLI Menu (implemented)
 
@@ -46,6 +51,8 @@
 3. Buscar y agregar ciudad
 4. Eliminar ciudad
 5. Establecer ciudad default
+6. Pronóstico 7 días (default)
+7. Pronóstico 7 días (elegir ciudad)
 8. Ajustes (°C/°F)
 9. Salir
 ```

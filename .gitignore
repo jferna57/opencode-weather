@@ -30,6 +30,7 @@ weather
 .eslintcache
 .cache
 *.tsbuildinfo
+.*.bun-build
 
 # IntelliJ based IDEs
 .idea

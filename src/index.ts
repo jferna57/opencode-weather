@@ -1,4 +1,4 @@
-import { fetchWeather, geocode } from "./api";
+import { fetchForecast, fetchWeather, geocode } from "./api";
 import {
   addCity,
   deleteCity,
@@ -13,8 +13,28 @@ import * as ui from "./ui";
 
 async function showCityWeather(city: City): Promise<void> {
   const unit = getUnit();
-  const temperature = await fetchWeather(city.latitude, city.longitude, unit);
-  ui.printWeather(city.name, temperature, unit);
+  const stop = ui.startSpinner(`Consultando clima de ${city.name}…`);
+  try {
+    const temperature = await fetchWeather(city.latitude, city.longitude, unit);
+    stop();
+    ui.printWeather(city.name, temperature, unit);
+  } catch (error) {
+    stop();
+    throw error;
+  }
+}
+
+async function showCityForecast(city: City): Promise<void> {
+  const unit = getUnit();
+  const stop = ui.startSpinner(`Consultando pronóstico de ${city.name}…`);
+  try {
+    const forecast = await fetchForecast(city.latitude, city.longitude, unit);
+    stop();
+    ui.printForecast(city.name, forecast, unit);
+  } catch (error) {
+    stop();
+    throw error;
+  }
 }
 
 async function optionDefaultWeather(): Promise<void> {
@@ -43,11 +63,19 @@ async function optionAddCity(): Promise<void> {
   const name = await ui.askCityName();
   if (!name) return;
 
-  const found = await geocode(name);
-  if (!found) {
+  const stop = ui.startSpinner(`Buscando "${name}"…`);
+  let candidates;
+  try {
+    candidates = await geocode(name);
+  } finally {
+    stop();
+  }
+  if (candidates.length === 0) {
     ui.printError(`No se encontró "${name}"`);
     return;
   }
+  const found = await ui.pickGeocodedCity(candidates);
+  if (!found) return;
   if (getAllCities().some((c) => c.name === found.name && c.latitude === found.latitude)) {
     ui.printInfo(`"${found.name}" ya está guardada.`);
     return;
@@ -85,6 +113,26 @@ async function optionSetDefault(): Promise<void> {
   ui.printInfo(`"${city.name}" ahora es la ciudad default.`);
 }
 
+async function optionDefaultForecast(): Promise<void> {
+  const city = getDefaultCity();
+  if (!city) {
+    ui.printInfo("No hay ciudad default. Usa la opción 5.");
+    return;
+  }
+  await showCityForecast(city);
+}
+
+async function optionPickForecast(): Promise<void> {
+  const cities = getAllCities();
+  if (cities.length === 0) {
+    ui.printInfo("No hay ciudades guardadas. Usa la opción 3.");
+    return;
+  }
+  const city = await ui.pickCity(cities, "Ciudad para el pronóstico");
+  if (!city) return;
+  await showCityForecast(city);
+}
+
 async function optionSettings(): Promise<void> {
   const unit = await ui.pickUnit(getUnit());
   if (!unit) return;
@@ -114,6 +162,12 @@ async function main(): Promise<void> {
           break;
         case 5:
           await optionSetDefault();
+          break;
+        case 6:
+          await optionDefaultForecast();
+          break;
+        case 7:
+          await optionPickForecast();
           break;
         case 8:
           await optionSettings();

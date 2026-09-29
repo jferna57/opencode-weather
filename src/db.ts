@@ -1,7 +1,14 @@
 import { Database } from "bun:sqlite";
+import { mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import type { City, Unit } from "./types";
 
-const db = new Database("weather.db", { create: true });
+const CONFIG_DIR =
+  process.env.WEATHER_CONFIG_DIR ?? join(homedir(), ".config", "weather-cli");
+mkdirSync(CONFIG_DIR, { recursive: true });
+
+const db = new Database(join(CONFIG_DIR, "weather.db"), { create: true });
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS cities (
@@ -60,6 +67,10 @@ export function addCity(city: { name: string; latitude: number; longitude: numbe
 
 export function deleteCity(id: number): void {
   db.query("DELETE FROM cities WHERE id = ?").run(id);
+}
+
+export function deleteAllCities(): void {
+  db.query("DELETE FROM cities").run();
 }
 
 export function setDefaultCity(id: number): void {
