@@ -190,6 +190,48 @@ function describeWeatherCode(code: number): string {
   return WEATHER_CODES[code] ?? `Código ${code}`;
 }
 
+const WEEKDAYS = [
+  "domingo",
+  "lunes",
+  "martes",
+  "miércoles",
+  "jueves",
+  "viernes",
+  "sábado",
+] as const;
+
+const MONTHS = [
+  "enero",
+  "febrero",
+  "marzo",
+  "abril",
+  "mayo",
+  "junio",
+  "julio",
+  "agosto",
+  "septiembre",
+  "octubre",
+  "noviembre",
+  "diciembre",
+] as const;
+
+/**
+ * Formatea una fecha `YYYY-MM-DD` como `lunes 09-septiembre-2026`.
+ * Los sábados y domingos se muestran en verde.
+ */
+export function formatDayDate(date: string): string {
+  const [year, month, day] = date.split("-").map(Number);
+  if (!year || !month || !day) return date;
+
+  const weekdayIndex = new Date(Date.UTC(year, month - 1, day)).getUTCDay();
+  const label =
+    `${WEEKDAYS[weekdayIndex]} ` +
+    `${String(day).padStart(2, "0")}-${MONTHS[month - 1]}-${year}`;
+
+  const isWeekend = weekdayIndex === 0 || weekdayIndex === 6;
+  return isWeekend ? kleur.green(label) : label;
+}
+
 export function printForecast(
   cityName: string,
   forecast: DailyForecast[],
@@ -201,7 +243,7 @@ export function printForecast(
     const max = kleur.yellow(`${day.tempMax.toFixed(1)}${unitLabel}`);
     const min = kleur.yellow(`${day.tempMin.toFixed(1)}${unitLabel}`);
     console.log(
-      `    ${day.date}  ↑${max}  ↓${min}  ${describeWeatherCode(day.weathercode)}`,
+      `    ${formatDayDate(day.date)}  ↑${max}  ↓${min}  ${describeWeatherCode(day.weathercode)}`,
     );
   }
   console.log();
@@ -261,7 +303,7 @@ export function printAlerts(results: CityAlerts[]): void {
       const badge = SEVERITY_BADGE[alert.severity];
       console.log(
         `    ${badge.color(kleur.bold(badge.text))}  ` +
-          `${alert.date}  ${alert.title} — ${kleur.italic(alert.detail)}`,
+          `${formatDayDate(alert.date)}  ${alert.title} — ${kleur.italic(alert.detail)}`,
       );
     }
   }
