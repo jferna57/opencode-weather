@@ -105,7 +105,9 @@ shadows the directory and imports keep resolving to the dead module.
   sigue pasando tras añadir `version` (bun no guarda la versión raíz en el lockfile)
 - La etiqueta se deriva de `version` (`v<version>`). Si `gh release view` encuentra el release,
   el job de `release` termina en verde sin hacer nada — no falla
-- Bun añade `.exe` solo en targets de Windows: el paso `Package` lo tiene en cuenta
+- Bun añade `.exe` solo en targets de Windows (`weather.exe`, no `weather`), así que el paso
+  `Package` **detecta** el nombre de la salida (`weather` / `weather.exe`) en vez de asumirlo,
+  y falla con un `::error::` claro si no encuentra ninguno. El asset conserva la extensión
 - Los assets van comprimidos (`tar.gz` / `zip`) más `SHA256SUMS`; empaqueta siempre por
   **nombre de archivo** (`tar -czf out.tgz -C dist bin`), nunca el directorio, o el archivo
   intenta contenerse a sí mismo

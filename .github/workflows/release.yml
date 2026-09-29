@@ -64,13 +64,28 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
+          # Bun nombra la salida según el SO: `weather.exe` en targets Windows y
+          # `weather` en el resto. No se asume el nombre, se comprueba.
+          src_bin=""
+          for candidate in weather weather.exe; do
+            if [ -f "$candidate" ]; then
+              src_bin="$candidate"
+              break
+            fi
+          done
+          if [ -z "$src_bin" ]; then
+            echo "::error::No se encontró el binario compilado (weather / weather.exe)"
+            ls -la
+            exit 1
+          fi
+
           if [ "${{ matrix.label }}" = "windows-x64" ]; then
-            mv weather dist/weather-windows-x64.exe
             bin="weather-windows-x64.exe"
           else
-            mv weather "dist/weather-${{ matrix.label }}"
             bin="weather-${{ matrix.label }}"
           fi
+          mv "$src_bin" "dist/$bin"
+
           # Se empaqueta por nombre (no el directorio) para que el archivo
           # resultante no intente contenerse a sí mismo.
           if [ "${{ matrix.ext }}" = "zip" ]; then
