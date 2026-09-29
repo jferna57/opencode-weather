@@ -92,6 +92,18 @@ shadows the directory and imports keep resolving to the dead module.
 
 ## Releases (CI)
 
+- Major mínimo para no volver a ver el aviso *"Node.js 20 is deprecated"* (GitHub fuerza las
+  actions de node20 a correr en node24). **Ojo: no basta con "soporta node24"**, algunas
+  versiones lo anuncian pero siguen ejecutándose en node20:
+
+  | action | major mínimo node24 | usando |
+  |---|---|---|
+  | `actions/checkout` | v5 | v7 |
+  | `actions/upload-artifact` | **v6** (v5 sigue en node20) | v7 |
+  | `actions/download-artifact` | **v7** (v4/v5/v6 en node20) | v8 |
+  | `oven-sh/setup-bun` | v2 ya es node24 | v2 |
+
+  Se puede comprobar leyendo `runs.using` en el `action.yml` del tag (`raw.githubusercontent.com`)
 - `.github/workflows/release.yml` — `build` (matrix de 5 targets) + `release`. Se dispara con
   `push` a `main` filtrando por `paths: [package.json]`, o con `workflow_dispatch`
 - El release se crea con el token **automático** del runner (`${{ github.token }}`), no con un
