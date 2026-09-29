@@ -6,7 +6,7 @@ export const SEVERITY_BADGE: Record<
   AlertSeverity,
   { text: string; color: (text: string) => string }
 > = {
-  info: { text: " info   ", color: kleur.yellow },
+  info: { text: " info  ", color: kleur.yellow },
   warning: { text: "aviso  ", color: kleur.red },
   danger: { text: "peligro", color: kleur.magenta },
 };

@@ -30,9 +30,16 @@ export async function askMenuOption(): Promise<MenuOption> {
       type: "text",
       name: "option",
       message: "Selecciona una opción",
-      validate: (value: string) =>
-        MENU_OPTIONS.includes(Number(value.trim()) as MenuOption) ||
-        "Opción inválida",
+      // El vacío se rechaza a propósito: `Number("")` es `0` y `0` es una
+      // opción válida, así que sin esta guarda un Enter accidental salía de la
+      // aplicación. Cancelar (Ctrl+C) ya lo resuelve el `fallback`.
+      validate: (value: string) => {
+        const trimmed = value.trim();
+        return (
+          (trimmed.length > 0 && MENU_OPTIONS.includes(Number(trimmed) as MenuOption)) ||
+          "Opción inválida"
+        );
+      },
     },
     { option: "0" },
   );

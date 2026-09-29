@@ -14,11 +14,11 @@ export async function askCityName(): Promise<string | null> {
   return name.trim() || null;
 }
 
-/** Con una sola coincidencia no se pregunta nada. */
+/** Con cero o una sola coincidencia no se pregunta nada. */
 export async function pickGeocodedCity(
   candidates: GeocodedCity[],
 ): Promise<GeocodedCity | null> {
-  if (candidates.length === 1) return candidates[0]!;
+  if (candidates.length <= 1) return candidates[0] ?? null;
   const { index } = await ask<{ index: number }>(
     {
       type: "select",

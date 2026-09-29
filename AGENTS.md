@@ -33,10 +33,6 @@ Data flows one way: `presentation` → `actions` → (`api` | `storage` | `utils
 - `src/utils/` — `constants.ts` (LINE, FRAMES, WEEKDAYS, MONTHS, MENU_OPTIONS),
   `format.ts`, `colors.ts` (`SEVERITY_BADGE`), `wmo.ts` (WMO table),
   `alerts.ts` (`DayMetrics`, `THRESHOLDS`, `evaluateDay()`, `groupCapeByDay()`)
-- `tests/` — mirrors `src/` layout, imports via `../../src/...`
-  - `tests/api/api.test.ts` (mocked `fetch`), `tests/storage/storage.test.ts`
-    (isolated temp DB via `WEATHER_CONFIG_DIR`, imported dynamically after the env var is set),
-    `tests/utils/alerts.test.ts`, `tests/utils/wmo.test.ts`
 - `tsconfig.json` — Strict TypeScript, bundler module resolution, ESNext target
 
 Never leave a stale `src/foo.ts` next to a new `src/foo/` directory: the file
@@ -70,6 +66,29 @@ shadows the directory and imports keep resolving to the dead module.
 - No Express, ws, ioredis, pg — use Bun built-ins
 - HTML imports for frontend if needed
 - Puedes usar `@bun-instructions.md` para obtener instrucciones de Bun.
+
+## Tests
+
+- `tests/` mirrors `src/`, importing via `../../src/...`; `tests/index.test.ts`
+  covers the menu switch in `src/index.ts`
+- `tests/helpers/` — shared scaffolding, not a layer of its own
+  - `sandbox.ts` — one temp dir per run, exported as `WEATHER_CONFIG_DIR`;
+    must be imported **before** anything that reaches `src/storage`. Bun has no
+    process-exit hook, so the dir is swept at the start of the *next* run, not
+    in an `afterAll`
+  - `modules.ts` — `mockWithRestore("./src/api", real, factory)`; paths are
+    project-relative and resolved to absolute inside, because `mock.module`
+    resolves its specifier against the file that calls it, not the caller.
+    Every double is restored in `afterAll` because `mock.module` leaks across
+    files in the same process
+  - `console.ts` — `captureConsole()` (ANSI-stripped + `rawLines`),
+    `silenceConsole()`, `setColors()`; colors are pinned per file in
+    `beforeAll`/`afterAll`, never in `afterEach`
+  - `actionHarness.ts` — mocks `api` + `presentation` for the action tests and
+    exports the **real** storage, imported dynamically so the sandbox is always
+    set first
+- `mockClear` is not enough between tests: it drops calls but keeps
+  implementations. Use `resetActionMocks()` / reinstall the default.
 
 ## API Integration (OpenMeteo)
 
