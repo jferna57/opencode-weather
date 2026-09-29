@@ -90,6 +90,26 @@ shadows the directory and imports keep resolving to the dead module.
 - `mockClear` is not enough between tests: it drops calls but keeps
   implementations. Use `resetActionMocks()` / reinstall the default.
 
+## Releases (CI)
+
+- `.github/workflows/release.yml` — `build` (matrix de 5 targets) + `release`. Se dispara con
+  `push` a `main` filtrando por `paths: [package.json]`, o con `workflow_dispatch`
+- El release se crea con el token **automático** del runner (`${{ github.token }}`), no con un
+  PAT: no hay secretos que configurar ni servicios externos, solo `permissions: contents: write`.
+  `gh` y la API de Releases exigen autenticación, así que el token automático es el mínimo
+  imprescindible — `gh release create` crea además el tag en `--target ${{ github.sha }}`
+- El binario se genera con **`bun run build --target=bun-<os>-<arch>`**: `bun run` concatena
+  los flags al final del script, así que caen sobre `bun build` y **no** sobre `bun test`
+  (los tests se ejecutan igual, y en los 5 jobs de la matrix)
+- `package.json` **no** tiene `bun.lock` acoplado a la versión: `bun install --frozen-lockfile`
+  sigue pasando tras añadir `version` (bun no guarda la versión raíz en el lockfile)
+- La etiqueta se deriva de `version` (`v<version>`). Si `gh release view` encuentra el release,
+  el job de `release` termina en verde sin hacer nada — no falla
+- Bun añade `.exe` solo en targets de Windows: el paso `Package` lo tiene en cuenta
+- Los assets van comprimidos (`tar.gz` / `zip`) más `SHA256SUMS`; empaqueta siempre por
+  **nombre de archivo** (`tar -czf out.tgz -C dist bin`), nunca el directorio, o el archivo
+  intenta contenerse a sí mismo
+
 ## API Integration (OpenMeteo)
 
 1. Geocoding: `https://geocoding-api.open-meteo.com/v1/search?name={city}&count=5&language=es&format=json`

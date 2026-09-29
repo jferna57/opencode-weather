@@ -49,3 +49,33 @@ Esta es la apariencia que deseamos crear
 ════════════════════════════════════════
   Selecciona una opción: 5
 ```
+
+## Releases
+
+`.github/workflows/release.yml` compila el binario y publica un release de GitHub para
+Linux, macOS y Windows (x64 y arm64).
+
+- **Disparo**: automáticamente al hacer push a `main` si cambia `package.json`, o
+  manualmente desde la pestaña **Actions**.
+- **Build**: `bun run build --target=bun-<os>-<arch>`. El script `build` también ejecuta
+  los tests, así que un test rojo impide publicar.
+- **Assets**: `weather-<os>-<arch>.tar.gz` (Unix), `weather-windows-x64.zip` y un
+  `SHA256SUMS` para verificar las descargas.
+- **Etiqueta**: se lee `version` de `package.json` y se usa `v<version>` (`0.1.0` → `v0.1.0`).
+  Si el release ya existe, el run termina sin hacer nada.
+- **Sin secretos**: no hay que crear un PAT ni añadir nada en *Settings → Secrets*.
+  GitHub inyecta un token automático en cada run y el workflow solo necesita
+  `permissions: contents: write`. No interviene ningún servicio externo.
+
+Publicar una versión nueva:
+
+```bash
+# edita "version" en package.json (0.1.0 -> 0.2.0)
+git commit -am "release: v0.2.0" && git push origin main
+```
+
+Verificar una descarga:
+
+```bash
+sha256sum -c SHA256SUMS   # shasum -a 256 -c SHA256SUMS en macOS
+```
