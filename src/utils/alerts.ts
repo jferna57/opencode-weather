@@ -1,4 +1,4 @@
-import type { AlertSeverity, Unit, WeatherAlert } from "./types";
+import type { AlertSeverity, Unit, WeatherAlert } from "../types";
 import { describeWmoCode, SNOW_CODES, STORM_CODES } from "./wmo";
 
 /**

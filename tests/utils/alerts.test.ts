@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { evaluateDay, groupCapeByDay, tempThreshold, THRESHOLDS } from "./alerts";
-import type { DayMetrics } from "./alerts";
+import {
+  evaluateDay,
+  groupCapeByDay,
+  tempThreshold,
+  THRESHOLDS,
+} from "../../src/utils/alerts";
+import type { DayMetrics } from "../../src/utils/alerts";
 
 const QUIET: DayMetrics = {
   date: "2026-10-01",

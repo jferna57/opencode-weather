@@ -7,6 +7,8 @@ El objetivo de esta aplicación es que creemos una aplicación de consola que pi
 - Ingresar el nombre de una ciudad.
 - Guardar la ciudad por defecto.
 - Registrar varias otras ciudades para buscar el clima en esas otras ciudades.
+- Consultar el pronóstico de 7 días y las alertas meteorológicas derivadas.
+- Cambiar la unidad de temperatura (°C/°F), que se persiste entre ejecuciones.
 
 ## Stack
 

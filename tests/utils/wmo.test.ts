@@ -1,5 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { describeWmoCode, SNOW_CODES, STORM_CODES, WMO_CODES } from "./wmo";
+import {
+  describeWmoCode,
+  SNOW_CODES,
+  STORM_CODES,
+  WMO_CODES,
+} from "../../src/utils/wmo";
 
 /** Subconjunto de códigos que Open-Meteo emite en `weather_code`. */
 const OPEN_METEO_CODES = [

@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
-import { fetchAlerts, fetchForecast, fetchWeather, geocode } from "./api";
+import { fetchAlerts } from "../../src/api/alerts";
+import { geocode } from "../../src/api/geocoding";
+import { fetchForecast, fetchWeather } from "../../src/api/weather";
 
 const originalFetch = globalThis.fetch;
 
