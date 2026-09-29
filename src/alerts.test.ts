@@ -67,9 +67,8 @@ describe("evaluateDay", () => {
   });
 
   test.each([
-    [95, "Tormenta"],
-    [96, "Tormenta con granizo"],
-    [97, "Tormenta fuerte"],
+    [95, "Tormenta fuerte con chubascos de lluvia y/o nieve"],
+    [96, "Tormenta con granizo ligero"],
     [99, "Tormenta fuerte con granizo"],
   ])("recognises WMO code %i as a dangerous storm", (code, title) => {
     const alerts = evaluateDay(days({ weatherCode: code }));
@@ -78,14 +77,19 @@ describe("evaluateDay", () => {
       kind: "tormenta",
       severity: "danger",
       title,
-      detail: `Código WMO ${code}`,
     });
+    expect(alerts[0]?.detail).toBeUndefined();
+  });
+
+  // El 97 está "Reserved" en la tabla WMO 4680 y Open-Meteo no lo emite.
+  test("ignores the reserved WMO code 97", () => {
+    expect(evaluateDay(days({ weatherCode: 97 }))).toEqual([]);
   });
 
   test("suppresses cape warning when an explicit storm code fires", () => {
-    const alerts = evaluateDay(days({ weatherCode: 97, capeMax: 4000 }));
+    const alerts = evaluateDay(days({ weatherCode: 99, capeMax: 4000 }));
     expect(alerts).toHaveLength(1);
-    expect(alerts[0]?.title).toBe("Tormenta fuerte");
+    expect(alerts[0]?.title).toBe("Tormenta fuerte con granizo");
   });
 
   test("flags high CAPE as potential storm when no storm code", () => {
@@ -101,15 +105,16 @@ describe("evaluateDay", () => {
 
   test.each([
     [71, "Nieve ligera"],
-    [73, "Nieve"],
+    [73, "Nieve moderada"],
     [75, "Nieve fuerte"],
     [77, "Granos de nieve"],
-    [85, "Chubascos de nieve"],
+    [85, "Chubascos de nieve ligeros"],
     [86, "Chubascos de nieve fuertes"],
   ])("recognises WMO code %i as snow", (code, title) => {
     const alerts = evaluateDay(days({ weatherCode: code }));
     expect(alerts).toHaveLength(1);
     expect(alerts[0]).toMatchObject({ kind: "nieve", severity: "warning", title });
+    expect(alerts[0]?.detail).toBeUndefined();
   });
 
   test("flags strong wind gusts", () => {

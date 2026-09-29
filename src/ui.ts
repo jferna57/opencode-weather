@@ -8,6 +8,7 @@ import type {
   GeocodedCity,
   Unit,
 } from "./types";
+import { describeWmoCode } from "./wmo";
 
 const LINE = "═".repeat(41);
 
@@ -162,34 +163,6 @@ export function printWeather(cityName: string, temperature: number, unit: Unit):
   console.log(`  ${cityName}: ${kleur.yellow(`${temperature.toFixed(1)} ${unitLabel}`)}`);
 }
 
-const WEATHER_CODES: Record<number, string> = {
-  0: "Despejado",
-  1: "Mayormente despejado",
-  2: "Parcial nublado",
-  3: "Nublado",
-  45: "Niebla",
-  48: "Niebla con escarcha",
-  51: "Llovizna ligera",
-  53: "Llovizna",
-  55: "Llovizna densa",
-  61: "Lluvia ligera",
-  63: "Lluvia",
-  65: "Lluvia fuerte",
-  71: "Nieve ligera",
-  73: "Nieve",
-  75: "Nieve fuerte",
-  80: "Chubascos ligeros",
-  81: "Chubascos",
-  82: "Chubascos fuertes",
-  95: "Tormenta",
-  96: "Tormenta con granizo",
-  99: "Tormenta fuerte con granizo",
-};
-
-function describeWeatherCode(code: number): string {
-  return WEATHER_CODES[code] ?? `Código ${code}`;
-}
-
 const WEEKDAYS = [
   "domingo",
   "lunes",
@@ -243,7 +216,7 @@ export function printForecast(
     const max = kleur.yellow(`${day.tempMax.toFixed(1)}${unitLabel}`);
     const min = kleur.yellow(`${day.tempMin.toFixed(1)}${unitLabel}`);
     console.log(
-      `    ${formatDayDate(day.date)}  ↑${max}  ↓${min}  ${describeWeatherCode(day.weathercode)}`,
+      `    ${formatDayDate(day.date)}  ↑${max}  ↓${min}  ${describeWmoCode(day.weathercode)}`,
     );
   }
   console.log();
@@ -301,9 +274,10 @@ export function printAlerts(results: CityAlerts[]): void {
     console.log(`\n  ${kleur.bold(`${city.name}${suffix}`)}`);
     for (const alert of alerts) {
       const badge = SEVERITY_BADGE[alert.severity];
+      const suffix = alert.detail ? ` — ${kleur.italic(alert.detail)}` : "";
       console.log(
         `    ${badge.color(kleur.bold(badge.text))}  ` +
-          `${formatDayDate(alert.date)}  ${alert.title} — ${kleur.italic(alert.detail)}`,
+          `${formatDayDate(alert.date)}  ${alert.title}${suffix}`,
       );
     }
   }

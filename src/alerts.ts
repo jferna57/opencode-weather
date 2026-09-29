@@ -1,4 +1,5 @@
 import type { AlertSeverity, Unit, WeatherAlert } from "./types";
+import { describeWmoCode, SNOW_CODES, STORM_CODES } from "./wmo";
 
 /**
  * Métricas agregadas para un día concreto.
@@ -28,22 +29,6 @@ export const SEVERITY_RANK: Record<AlertSeverity, number> = {
   danger: 0,
   warning: 1,
   info: 2,
-};
-
-const STORM_CODES: Record<number, string> = {
-  95: "Tormenta",
-  96: "Tormenta con granizo",
-  97: "Tormenta fuerte",
-  99: "Tormenta fuerte con granizo",
-};
-
-const SNOW_CODES: Record<number, string> = {
-  71: "Nieve ligera",
-  73: "Nieve",
-  75: "Nieve fuerte",
-  77: "Granos de nieve",
-  85: "Chubascos de nieve",
-  86: "Chubascos de nieve fuertes",
 };
 
 /** Umbral de calor máximo convertido a la unidad activa. */
@@ -86,13 +71,11 @@ export function evaluateDay(day: DayMetrics, unit: Unit = "celsius"): WeatherAle
     });
   }
 
-  const storm = STORM_CODES[day.weatherCode];
-  if (storm) {
+  if (STORM_CODES.has(day.weatherCode)) {
     alerts.push({
       kind: "tormenta",
       severity: "danger",
-      title: storm,
-      detail: `Código WMO ${day.weatherCode}`,
+      title: describeWmoCode(day.weatherCode),
       date: day.date,
     });
   } else if (day.capeMax >= THRESHOLDS.capeJkg) {
@@ -115,13 +98,11 @@ export function evaluateDay(day: DayMetrics, unit: Unit = "celsius"): WeatherAle
     });
   }
 
-  const snow = SNOW_CODES[day.weatherCode];
-  if (snow) {
+  if (SNOW_CODES.has(day.weatherCode)) {
     alerts.push({
       kind: "nieve",
       severity: "warning",
-      title: snow,
-      detail: `Código WMO ${day.weatherCode}`,
+      title: describeWmoCode(day.weatherCode),
       date: day.date,
     });
   }

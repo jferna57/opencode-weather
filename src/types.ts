@@ -35,7 +35,8 @@ export interface WeatherAlert {
   kind: AlertKind;
   severity: AlertSeverity;
   title: string;
-  detail: string;
+  /** Presente solo cuando hay una métrica que añadir al título. */
+  detail?: string;
   date: string;
 }
 
