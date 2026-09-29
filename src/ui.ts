@@ -1,10 +1,17 @@
 import kleur from "kleur";
 import prompts from "prompts";
-import type { City, DailyForecast, GeocodedCity, Unit } from "./types";
+import type {
+  AlertSeverity,
+  City,
+  CityAlerts,
+  DailyForecast,
+  GeocodedCity,
+  Unit,
+} from "./types";
 
 const LINE = "═".repeat(41);
 
-export const MENU_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+export const MENU_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 export type MenuOption = (typeof MENU_OPTIONS)[number];
 
 async function ask<T extends Record<string, unknown>>(
@@ -35,6 +42,7 @@ export function printMenu(cityCount: number, unit: Unit): void {
   console.log(kleur.cyan("  7. Pronóstico 7 días (elegir ciudad)"));
   console.log(kleur.cyan(`  8. Ajustes (${unitLabel})`));
   console.log(kleur.cyan("  9. Salir"));
+  console.log(kleur.cyan(" 10. Alertas meteorológicas"));
   console.log(LINE);
 }
 
@@ -220,4 +228,45 @@ export function printError(message: string): void {
 
 export function printInfo(message: string): void {
   console.log(`  ${kleur.green("ℹ")} ${message}`);
+}
+
+const SEVERITY_BADGE: Record<AlertSeverity, { text: string; color: (text: string) => string }> = {
+  info: { text: " info   ", color: kleur.yellow },
+  warning: { text: "aviso  ", color: kleur.red },
+  danger: { text: "peligro", color: kleur.magenta },
+};
+
+/**
+ * Muestra solo las ciudades que tienen alertas activas. Si ninguna la
+ * tiene, se informa con un mensaje verde en lugar de un listado vacío.
+ */
+export function printAlerts(results: CityAlerts[]): void {
+  const active = results.filter(({ alerts }) => alerts.length > 0);
+
+  if (active.length === 0) {
+    console.log();
+    printInfo(`Sin alertas activas en tus ${results.length} ciudades.`);
+    console.log();
+    return;
+  }
+
+  console.log();
+  console.log(`  ${kleur.magenta(kleur.bold("⚠ ALERTAS METEOROLÓGICAS"))}`);
+  console.log(`  ${LINE}`);
+
+  for (const { city, alerts } of active) {
+    const suffix = city.is_default ? " (default)" : "";
+    console.log(`\n  ${kleur.bold(`${city.name}${suffix}`)}`);
+    for (const alert of alerts) {
+      const badge = SEVERITY_BADGE[alert.severity];
+      console.log(
+        `    ${badge.color(kleur.bold(badge.text))}  ` +
+          `${alert.date}  ${alert.title} — ${kleur.italic(alert.detail)}`,
+      );
+    }
+  }
+
+  const count = active.length;
+  console.log(`\n  ${kleur.magenta(`⚠ ${count} ${count === 1 ? "ciudad" : "ciudades"} con avisos`)}`);
+  console.log();
 }

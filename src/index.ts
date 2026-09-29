@@ -1,4 +1,4 @@
-import { fetchForecast, fetchWeather, geocode } from "./api";
+import { fetchAlerts, fetchForecast, fetchWeather, geocode } from "./api";
 import {
   addCity,
   deleteCity,
@@ -141,6 +141,25 @@ async function optionSettings(): Promise<void> {
   ui.printInfo(`Unidad: ${unit === "celsius" ? "°C" : "°F"}`);
 }
 
+async function optionAlerts(): Promise<void> {
+  const cities = getAllCities();
+  if (cities.length === 0) {
+    ui.printInfo("No hay ciudades guardadas. Usa la opción 3.");
+    return;
+  }
+
+  const unit = getUnit();
+  const stop = ui.startSpinner(`Revisando alertas de ${cities.length} ciudades…`);
+  try {
+    const results = await fetchAlerts(cities, unit);
+    stop();
+    ui.printAlerts(results);
+  } catch (error) {
+    stop();
+    throw error;
+  }
+}
+
 async function main(): Promise<void> {
   while (true) {
     ui.printMenu(getAllCities().length, getUnit());
@@ -175,6 +194,9 @@ async function main(): Promise<void> {
         case 9:
           console.log();
           return;
+        case 10:
+          await optionAlerts();
+          break;
       }
     } catch (error) {
       ui.printError(error instanceof Error ? error.message : String(error));

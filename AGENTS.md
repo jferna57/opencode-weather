@@ -22,12 +22,21 @@
 
 ## State
 
-- Menu options 1–9 implemented; unit (°C/°F) persisted in `settings` table
+- Menu options 1-10 implemented; unit (°C/°F) persisted in `settings` table
 - Options 6/7: 7-day forecast (default city / pick a city)
+- Option 10: derived weather alerts for all cities (single multi-coordinate Open-Meteo request)
 - First city added becomes default automatically; duplicate cities are rejected by name+coords
 - Colors via `kleur`: cyan (menu), yellow (temps), green (info), red (errors)
 - Async operations show a spinner; geocoding returns multiple results with a select prompt for ambiguous names
 - Dependencies: `prompts` (UI), `kleur` (colors). Keep `bunx tsc --noEmit` and `bun test` clean before finishing
+
+## Alerts (option 10)
+
+- **Open-Meteo has no alerts endpoint.** `GET /v1/alerts` is 404 and `alerts=true` is silently ignored; `daily=cape` is an HTTP 400 (CAPE is hourly-only)
+- Alerts are therefore *derived* from forecast variables in `src/alerts.ts` (pure, unit-tested) and fetched by `fetchAlerts()` in `src/api.ts`
+- One request for the whole list: comma-separated lat/lon returns a JSON array in input order (a single city returns an object, so responses are normalized)
+- `daily` requires `timezone=auto`; `hourly=cape` is aggregated per local day by `groupCapeByDay()`
+- Fixed thresholds (not user-configurable) live in `THRESHOLDS`
 
 ## Conventions (from bun-instructions.md)
 
@@ -55,4 +64,5 @@
 7. Pronóstico 7 días (elegir ciudad)
 8. Ajustes (°C/°F)
 9. Salir
+10. Alertas meteorológicas
 ```
