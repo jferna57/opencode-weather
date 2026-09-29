@@ -43,7 +43,7 @@ Esta es la apariencia que deseamos crear
   4. Eliminar ciudad
   5. Establecer ciudad default
   8. Ajustes (°C)
-  9. Salir
+  0. Salir
 ════════════════════════════════════════
   Selecciona una opción: 5
 ```

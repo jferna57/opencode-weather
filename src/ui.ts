@@ -11,7 +11,7 @@ import type {
 
 const LINE = "═".repeat(41);
 
-export const MENU_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+export const MENU_OPTIONS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 export type MenuOption = (typeof MENU_OPTIONS)[number];
 
 async function ask<T extends Record<string, unknown>>(
@@ -41,8 +41,8 @@ export function printMenu(cityCount: number, unit: Unit): void {
   console.log(kleur.cyan("  6. Pronóstico 7 días (default)"));
   console.log(kleur.cyan("  7. Pronóstico 7 días (elegir ciudad)"));
   console.log(kleur.cyan(`  8. Ajustes (${unitLabel})`));
-  console.log(kleur.cyan("  9. Salir"));
-  console.log(kleur.cyan(" 10. Alertas meteorológicas"));
+  console.log(kleur.cyan("  9. Alertas meteorológicas"));
+  console.log(kleur.cyan("  0. Salir"));
   console.log(LINE);
 }
 
@@ -56,7 +56,7 @@ export async function askMenuOption(): Promise<MenuOption> {
         MENU_OPTIONS.includes(Number(value.trim()) as MenuOption) ||
         "Opción inválida",
     },
-    { option: "9" },
+    { option: "0" },
   );
 
   return Number(option.trim()) as MenuOption;

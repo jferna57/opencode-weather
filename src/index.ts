@@ -192,11 +192,11 @@ async function main(): Promise<void> {
           await optionSettings();
           break;
         case 9:
-          console.log();
-          return;
-        case 10:
           await optionAlerts();
           break;
+        case 0:
+          console.log();
+          return;
       }
     } catch (error) {
       ui.printError(error instanceof Error ? error.message : String(error));
